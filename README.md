@@ -73,3 +73,11 @@ This project is designed to monitor the flow rate and volume of sewage using a f
 
 ### Example Output:
 - **Serial Monitor**:
+- Sensor = 200 Rate: 5 L/M Vol: 12 L
+  
+- **LCD**:
+- Line 1: Rate: **5 L/M**
+- Line 2: Vol: **12 L**
+
+### License:
+This project is open-source and available under the [MIT License](LICENSE).
