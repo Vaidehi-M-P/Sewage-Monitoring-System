@@ -1,0 +1,172 @@
+
+
+const int buzzer=7;
+int i;
+const int analogInPin = A0; 
+int sensorValue = 0;
+
+volatile int flow_frequency; // Measures flow sensor pulses
+
+// Calculated litres/hour
+
+ float vol = 0.0,l_minute;
+
+unsigned char flowsensor = 2; // Sensor Input
+
+unsigned long currentTime;
+
+unsigned long cloopTime;
+
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27,20,4);
+
+void flow () // Interrupt function
+
+{
+
+   flow_frequency++;
+
+}
+
+void setup()
+
+{
+
+  pinMode(buzzer,OUTPUT);
+  pinMode(3,INPUT);  
+   pinMode(flowsensor, INPUT);
+
+   digitalWrite(flowsensor, HIGH); // Optional Internal Pull-Up
+
+   Serial.begin(9600);
+
+
+  lcd.init();    
+                   
+  lcd.backlight();
+   
+   attachInterrupt(digitalPinToInterrupt(flowsensor), flow, RISING); // Setup Interrupt
+
+   lcd.clear();
+
+   lcd.setCursor(0,0);
+
+   lcd.print("SEWAGE MONITORING");
+
+   lcd.setCursor(5
+   .22,1);
+
+   lcd.print("SYSTEM");
+   delay(3000);
+   lcd.clear();
+}
+
+void loop ()
+
+{
+sensorValue = analogRead(analogInPin); 
+Serial.print("Sensor = " ); 
+Serial.print(sensorValue*100/512); 
+int x = abs(sensorValue*100/512);
+Serial.println("%");
+delay(1000); 
+   currentTime = millis();
+
+
+         if(digitalRead(3)==1)
+{
+  digitalWrite(buzzer,LOW);
+  
+}
+
+else
+{
+  digitalWrite(buzzer,HIGH);
+  delay(5000);
+}
+
+   // Every second, calculate and print litres/hour
+
+   if(currentTime >= (cloopTime + 1000))
+
+   {
+
+    cloopTime = currentTime; // Updates cloopTime
+
+    if(flow_frequency != 0){
+
+      // Pulse frequency (Hz) = 7.5Q, Q is flow rate in L/min.
+
+      l_minute = (flow_frequency / 7.5); // (Pulse frequency x 60 min) / 7.5Q = flowrate in L/hour
+
+      lcd.clear();
+
+      lcd.setCursor(0,0);
+
+      lcd.print("Rate: ");
+
+      lcd.print(l_minute);
+
+      lcd.print(" L/M");
+
+      l_minute = l_minute/60;
+      lcd.print("    ");
+//      lcd.setCursor(12,0);
+//      lcd.print("DEP");
+      
+      lcd.setCursor(0,1);
+
+      vol = vol +l_minute;
+
+      lcd.print("Vol:");
+
+      lcd.print(vol);
+
+      lcd.print(" L"); 
+      lcd.print("    ");
+//      lcd.setCursor(12,0);
+//      lcd.print(X);
+      flow_frequency = 0; // Reset Counter
+
+      Serial.print(l_minute, DEC); // Print litres/hour
+
+      Serial.println(" L/Sec");
+
+    }
+
+    else {
+
+      Serial.println(" flow rate = 0 ");
+
+      lcd.clear();
+
+      lcd.setCursor(0,0);
+
+      lcd.print("Rate: ");
+
+      lcd.print( flow_frequency );
+
+      lcd.print(" L/M");
+
+      lcd.setCursor(0,1);
+
+      lcd.print("Vol:");
+
+      lcd.print(vol);
+
+      lcd.print(" L");
+    }
+
+   }
+      lcd.setCursor(12,0);
+      lcd.print("DEP ");
+      lcd.setCursor(12,1);
+      lcd.print(x);
+
+
+
+
+      
+
+}
